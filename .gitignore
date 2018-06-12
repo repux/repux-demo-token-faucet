@@ -1,0 +1,10 @@
+node_modules
+yarn-error.log
+*.log
+lib
+*.swp
+src/config.js
+*.dat
+
+dist/bundle.js
+config/*.js

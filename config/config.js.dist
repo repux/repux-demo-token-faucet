@@ -1,0 +1,10 @@
+const config = {
+    serverPort: 3000,
+    demoTokenAddress: '0xfa19d4e302336d61b895ea3b26bf4864bdd1d8ab',
+    account: '0x07f486c4ec2ade092abfe3261d0fc891e737e689',
+    giveawayTokenAmounts: 100, // in ether
+    ethereumHost: 'http://127.0.0.1:8545',
+    serverHost: 'http://127.0.0.1:3000'
+}
+
+module.exports = config;
