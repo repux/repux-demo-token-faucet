@@ -60,8 +60,8 @@ app.get('/', (req, res) => {
 app.post('/issue-demo-token', async (req, res) => {
     const data = req.body;
     if (!web3.isAddress(data.recipientAddress)) {
-        logger.error('Wrong recipient address: ' + data.recipientAddress);
-        res.sendStatus(HttpStatusCode.UNPROCESSABLE_ENTITY);
+        let message = 'Wrong recipient address: ' + data.recipientAddress;
+        res.status(HttpStatusCode.UNPROCESSABLE_ENTITY).send(message);
         return;
     }
 

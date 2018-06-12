@@ -7,7 +7,7 @@ window.$ = $;
 jQuery(document).ready(function ($) {
     $("#issueForm").submit(function (event) {
         event.preventDefault();
-        $('#submit').prop('disabled', true);
+        var submitButton = $('#submit');
         var messageDiv = jQuery('#message');
         var $form = $(this);
         var recipientAddress = $form.find("input[name='recipientAddress']").val();
@@ -26,6 +26,7 @@ jQuery(document).ready(function ($) {
             contentType: "application/json; charset=utf-8",
             data: JSON.stringify({ recipientAddress: recipientAddress }),
             beforeSend: function () {
+                submitButton.prop('disabled', true);
                 messageDiv.removeClass().addClass('alert').addClass('alert-secondary');
                 messageDiv.html('Processing. Please wait ...');
             },
@@ -36,14 +37,17 @@ jQuery(document).ready(function ($) {
                 }
                 else {
                     messageDiv.removeClass().addClass('alert').addClass('alert-danger');
-                    messageDiv.html('Something went wrong.');
+                    messageDiv.html('Something went wrong.' + data);
                 }
 
                 return false;
             },
-            error: function () {
+            complete: function() {
+                submitButton.prop('disabled', false);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
                 messageDiv.removeClass().addClass('alert').addClass('alert-danger');
-                messageDiv.html('There were some errors. Try later.');
+                messageDiv.html('There were some errors.' + jqXHR.responseText || '');
             }
         });
     });
