@@ -17,14 +17,13 @@
             <h1>RepuX DemoToken faucet</h1>
         </div>
         <form method="POST" id="issueForm" class="form-label-group" action="#">
-            <div class="form-label-group">
-            <input class="form-control" type="text" name="recipientAddress" placeholder="your address" />
-
+            <div class="form-label-group mb-3">
+                <input class="form-control" type="text" name="recipientAddress" placeholder="your address" />
+                <div id="message" class="alert-primary" role="alert"> </div>
             </div>
 
-            <button class="btn btn-lg btn-primary btn-block" id="submit">Request for 100 DemoTokens</button>
+            <button class="btn btn-lg btn-primary btn-block mb-3" id="submit">Request for 100 DemoTokens</button>
         </form>
-        <div id="message" class="alert-primary" role="alert"> </div>
     </div>
 
     <script src="bundle.js"> </script>

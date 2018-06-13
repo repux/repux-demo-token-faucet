@@ -1,16 +1,13 @@
-import $ from 'jquery';
+import jQuery from 'jquery';
 import { serverHost } from './../../config/config';
 
-window.jQuery = $;
-window.$ = $;
-
-jQuery(document).ready(function ($) {
-    $("#issueForm").submit(function (event) {
+(function($) {
+    $('#issueForm').submit(function (event) {
         event.preventDefault();
         var submitButton = $('#submit');
         var messageDiv = jQuery('#message');
         var $form = $(this);
-        var recipientAddress = $form.find("input[name='recipientAddress']").val();
+        var recipientAddress = $form.find('input[name="recipientAddress"]').val();
 
         if (recipientAddress.length !== 42) {
             messageDiv.removeClass().addClass('alert').addClass('alert-danger');
@@ -20,23 +17,23 @@ jQuery(document).ready(function ($) {
         }
 
         $.ajax({
-            type: "POST",
-            url: serverHost + "/issue-demo-token",
+            type: 'POST',
+            url: serverHost + '/issue-demo-token',
             dataType: 'text',
-            contentType: "application/json; charset=utf-8",
+            contentType: 'application/json; charset=utf-8',
             data: JSON.stringify({ recipientAddress: recipientAddress }),
             beforeSend: function () {
                 submitButton.prop('disabled', true);
-                messageDiv.removeClass().addClass('alert').addClass('alert-secondary');
+                messageDiv.removeClass().addClass('alert alert-secondary');
                 messageDiv.html('Processing. Please wait ...');
             },
             success: function (data, textStatus, jqXHR) {
                 if (jqXHR.status == 200) {
-                    messageDiv.removeClass().addClass('alert').addClass('alert-success');
+                    messageDiv.removeClass().addClass('alert alert-success');
                     messageDiv.html('Done. Thank you.');
                 }
                 else {
-                    messageDiv.removeClass().addClass('alert').addClass('alert-danger');
+                    messageDiv.removeClass().addClass('alert alert-danger');
                     messageDiv.html('Something went wrong.' + data);
                 }
 
@@ -46,9 +43,9 @@ jQuery(document).ready(function ($) {
                 submitButton.prop('disabled', false);
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                messageDiv.removeClass().addClass('alert').addClass('alert-danger');
+                messageDiv.removeClass().addClass('alert alert-danger');
                 messageDiv.html('There were some errors.' + jqXHR.responseText || '');
             }
         });
     });
-});
+})(jQuery);
