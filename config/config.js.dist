@@ -1,10 +1,17 @@
 const config = {
-    serverPort: process.env.FAUCET_SERVER_PORT || 3000,
+    server: {
+        process.env.FAUCET_SERVER_PROTOCOL || 'https',
+        process.env.FAUCET_SERVER_PORT || 3000,
+        process.env.FAUCET_SERVER_HOST || 'localhost'
+    },
+    ssl: {
+        keyPath: '/shared/ssl/cert.key' || process.env.FAUCET_SSL_KEY_PATH,
+        certPath: '/shared/ssl/cert.pem' || process.env.FAUCET_SSL_CERT_PATH
+    },
     demoTokenAddress: process.env.FAUCET_DEMO_TOKEN_ADDRESS || '0xfa19d4e302336d61b895ea3b26bf4864bdd1d8ab',
     account: process.env.FAUCET_ACCOUNT || '0x07f486c4ec2ade092abfe3261d0fc891e737e689',
     giveawayTokenAmounts: process.env.FAUCET_GIVEAWAY_TOKENS_AMOUNT || 100, // in ether
-    ethereumHost: process.env.FAUCET_ETHEREUM_HOST || 'http://127.0.0.1:8545',
-    serverHost: process.env.FAUCET_SERVER_HOST || 'http://127.0.0.1:3000'
+    ethereumHost: process.env.FAUCET_ETHEREUM_HOST || 'http://127.0.0.1:8545'
 }
 
 module.exports = config;

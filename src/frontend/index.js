@@ -1,6 +1,7 @@
 import jQuery from 'jquery';
-import { serverHost } from './../../config/config';
+import { server } from './../../config/config';
 
+var serverHost = server.protocol + '://' + server.host + ':' + server.port;
 (function($) {
     $('#issueForm').submit(function (event) {
         event.preventDefault();
