@@ -27,3 +27,17 @@ All fronted files are located in dist/ folder.
 ```bash
 curl -v -X POST http://127.0.0.1:3000/issue-demo-token --header "Content-Type: application/json" -d '{"recipientAddress":"0x08AB86b24ae7F375aE962D134eA32178aBbEF04a" }'
 ```
+
+## Developent
+
+If you need to run httpS server for dist/ project you can install http-server
+
+```bash
+npm install -g http-server
+```
+
+go to dist/ folder and run with certs:
+
+```bash
+http-server --ssl --key ./../ssl/cert.key --cert ./../ssl/cert.pem
+```
