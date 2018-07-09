@@ -1,8 +1,8 @@
 const config = {
     server: {
-        process.env.FAUCET_SERVER_PROTOCOL || 'https',
-        process.env.FAUCET_SERVER_PORT || 3000,
-        process.env.FAUCET_SERVER_HOST || 'localhost'
+        protocol: process.env.FAUCET_SERVER_PROTOCOL || 'https',
+        port: process.env.FAUCET_SERVER_PORT || 3000,
+        host: process.env.FAUCET_SERVER_HOST || 'localhost'
     },
     ssl: {
         keyPath: '/shared/ssl/cert.key' || process.env.FAUCET_SSL_KEY_PATH,
