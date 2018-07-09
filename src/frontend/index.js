@@ -1,7 +1,6 @@
 import jQuery from 'jquery';
-import { server } from './../../config/config';
+import { serverApiUrl } from './../../config/config';
 
-var serverHost = server.protocol + '://' + server.host + ':' + server.port;
 (function($) {
     $('#issueForm').submit(function (event) {
         event.preventDefault();
@@ -19,7 +18,7 @@ var serverHost = server.protocol + '://' + server.host + ':' + server.port;
 
         $.ajax({
             type: 'POST',
-            url: serverHost + '/issue-demo-token',
+            url: serverApiUrl + '/issue-demo-token',
             dataType: 'text',
             contentType: 'application/json; charset=utf-8',
             data: JSON.stringify({ recipientAddress: recipientAddress }),
