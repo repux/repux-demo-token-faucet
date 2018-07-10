@@ -5,5 +5,5 @@ lib
 *.swp
 *.dat
 
-dist/bundle.js
+dist/*
 config/.env
