@@ -9,11 +9,13 @@ const config = {
         certPath: process.env.FAUCET_SSL_CERT_PATH || './ssl/cert.pem'
     },
 
-    demoTokenAddress: process.env.FAUCET_DEMO_TOKEN_ADDRESS || '0x618231c15b548292abc0013da5e24bab350c86d2',
-    account: process.env.FAUCET_ACCOUNT || '0x07f486c4ec2ade092abfe3261d0fc891e737e689',
+    demoTokenAddress: process.env.FAUCET_DEMO_TOKEN_ADDRESS || '0xbd83c21e6f0a9547abe908c6faa02a55512d57b4',
+    account: process.env.FAUCET_ACCOUNT || '0x107a1dc2a74adb3c0fdddb20614b1bdabf35a8a8',
     giveawayTokenAmounts: process.env.FAUCET_GIVEAWAY_TOKENS_AMOUNT || 100, // in ether
-    ethereumHost: process.env.FAUCET_ETHEREUM_HOST || 'http://127.0.0.1:8545',
-    serverApiUrl: process.env.FAUCET_SERVER_API_URL || 'https://localhost:3000'
+    throttleTimeInSeconds: process.env.FAUCET_THROTTLE_TIME_IN_SECONDS || 60,
+    ethereumHost: process.env.FAUCET_ETHEREUM_HOST || 'http://localhost:8545',
+    serverApiUrl: process.env.FAUCET_SERVER_API_URL || 'http://localhost:3000',
+    mongodbUri: process.env.FAUCET_SERVER_MONGODB_URI || 'mongodb://localhost:27017/repux_demo_token_faucet'
 }
 
 module.exports = config;
