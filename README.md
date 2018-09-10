@@ -30,6 +30,8 @@ curl -v -X POST http://127.0.0.1:3000/issue-demo-token --header "Content-Type: a
 
 ## Developent
 
+Frontend gets configuration from .env file during build process.
+
 If you need to run httpS server for dist/ project you can install http-server
 
 ```bash

@@ -4,6 +4,8 @@ yarn-error.log
 lib
 *.swp
 *.dat
+.idea
 
 dist/*
 config/.env
+config/config.*.js

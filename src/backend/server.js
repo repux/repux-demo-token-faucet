@@ -2,15 +2,18 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const express = require('express');
+const mongoose = require('mongoose');
 const config = require('./../../config/config.js');
 const bodyParser = require('body-parser');
 const HttpStatusCode = require('http-status-codes');
 const logger = require('./logger');
+const Issue = require('./models/issue-model');
 const { DemoToken, web3 } = require('./demo-token');
 
-logger.info('DemoToken address set to: ' + config.demoTokenAddress);
-logger.info('Connecting to: ' + config.ethereumHost);
-logger.info('Getting demo token: ' + config.demoTokenAddress);
+logger.info('[init] DemoToken address set to: ' + config.demoTokenAddress);
+logger.info('[init] Connecting to: ' + config.ethereumHost);
+logger.info('[init] Getting demo token: ' + config.demoTokenAddress);
+logger.info('[init] Connecting to mongodb: ' + config.mongodbUri);
 
 let tokenInstance = null;
 const useSSL = config.server.protocol === 'https';
@@ -26,24 +29,26 @@ app.use(headerSetup);
 app.get('/', appVersionHandler);
 app.post('/issue-demo-token', issueDemoTokenHandler);
 
-DemoToken.at(config.demoTokenAddress)
-    .then(async response => {
+Promise.resolve()
+    .then(() => DemoToken.at(config.demoTokenAddress))
+    .then(response => {
         tokenInstance = response;
-        if (useSSL) {
-            runHttpsServer();
-        }
-        else {
-            runHttpServer();
-        }
+        useSSL === true ? runHttpsServer() : runHttpServer();
     })
+    .then(() => mongoose.connect(config.mongodbUri, {
+        useNewUrlParser: true,
+        useCreateIndex: true
+    }))
+    .then(() => logger.info('[init] initialization success.'))
     .catch((e) => {
-        logger.error(`DemoToken connection: ${e.message}`);
+        logger.error(`[init] initialization failed: ${e.message}`);
+        process.exit();
     });
 
 function headerSetup(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 
     next();
 }
@@ -55,18 +60,32 @@ function appVersionHandler(req, res) {
 async function issueDemoTokenHandler(req, res) {
     const data = req.body;
     if (!web3.isAddress(data.recipientAddress)) {
-        let message = 'Wrong recipient address: ' + data.recipientAddress;
+        let message = `Wrong recipient address: ${data.recipientAddress} `;
         logger.info(message);
         res.status(HttpStatusCode.UNPROCESSABLE_ENTITY).send(message);
         return;
     }
+    
+    const isThrottled = await Issue.method.isAddressThrottled(data.recipientAddress, config.throttleTimeInSeconds);
+    if (isThrottled) {
+        let message = `The adress ${data.recipientAddress} has reached limit.`;
+        logger.info(message);
+        res.status(HttpStatusCode.TOO_MANY_REQUESTS).send(message);
+        return;
+    }
 
     const value = web3.toWei(config.giveawayTokenAmounts, "ether");
-    logger.info('Issue demo token. Recipient: ' + data.recipientAddress + ' value: ' + value);
+    logger.info(`[blockchain] Issue demo token. Recipient: ${data.recipientAddress} value ${value} `);
     try {
-        await tokenInstance.issue(data.recipientAddress, value, {
-            from: config.account
+        await tokenInstance.issue(data.recipientAddress, value, { from: config.account });
+        let issue = new Issue.model({
+            address: data.recipientAddress,
+            tokensAmount: config.giveawayTokenAmounts
         });
+        await issue.save()
+            .catch(e => {
+                logger.error(`[mongodb][save] ${e.message}`);
+            });
         res.sendStatus(HttpStatusCode.OK);
     }
     catch (e) {
@@ -81,12 +100,12 @@ function runHttpsServer() {
         cert: fs.readFileSync(config.ssl.certPath)
     };
     https.createServer(httpsConfig, app).listen(serverConfig, () => {
-        logger.info(`Listening on https://${config.server.host}:${config.server.port}. Loaded certs: ${config.ssl.keyPath}, ${config.ssl.certPath}`);
+        logger.info(`[init] Listening on https://${config.server.host}:${config.server.port}. Loaded certs: ${config.ssl.keyPath}, ${config.ssl.certPath}`);
     });
 }
 
 function runHttpServer() {
     http.createServer(app).listen(serverConfig, () => {
-        logger.info(`Listening on http://${config.server.host}:${config.server.port}`);
+        logger.info(`[init] Listening on http://${config.server.host}:${config.server.port}`);
     });
 }
