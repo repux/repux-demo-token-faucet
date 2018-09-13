@@ -76,54 +76,57 @@ async function issueDemoTokenHandler(req, res) {
         return;
     }
 
-    const value = web3.toWei(config.giveawayTokenAmounts, 'ether');
-    logger.info(`[blockchain] Issue demo token. Recipient: ${data.recipientAddress} value ${value} `);
-    try {
-        await tokenInstance.issue(data.recipientAddress, value, { from: config.account });
-        let issue = new Issue.model({
-            address: data.recipientAddress,
-            tokensAmount: config.giveawayTokenAmounts
+    let issue = new Issue.model({
+        address: data.recipientAddress,
+        tokensAmount: config.giveawayTokenAmounts
+    });
+    await issue.save().
+        then(async () => {
+            const value = web3.toWei(config.giveawayTokenAmounts, 'ether');
+            logger.info(`[blockchain] Issue demo token. Recipient: ${data.recipientAddress} value ${value} `);
+            try {
+                await tokenInstance.issue(data.recipientAddress, value, { from: config.account });
+                res
+                    .status(HttpStatusCode.OK)
+                    .send(JSON.stringify({ result: 'OK' }));
+            }
+            catch (e) {
+                issue.remove();
+                logger.error(data.recipientAddress + ' ' + e.message);
+                res.sendStatus(HttpStatusCode.BAD_REQUEST);
+            }
+        })
+        .catch(e => {
+            logger.error(`[mongodb][save] ${e.message}`);
         });
-        await issue.save()
-            .catch(e => {
-                logger.error(`[mongodb][save] ${e.message}`);
-            });
-        res
-          .status(HttpStatusCode.OK)
-          .send(JSON.stringify({ result: 'OK' }));;
-    }
-    catch (e) {
-        logger.error(data.recipientAddress + ' ' + e.message);
-        res.sendStatus(HttpStatusCode.BAD_REQUEST);
-    }
 }
 
 function secondsToFormattedTime(timeInSeconds) {
-  let seconds = timeInSeconds;
+    let seconds = timeInSeconds;
 
-  const days = Math.floor(seconds / (3600 * 24));
-  seconds -= days * 3600 * 24;
+    const days = Math.floor(seconds / (3600 * 24));
+    seconds -= days * 3600 * 24;
 
-  const hours = Math.floor(seconds / 3600);
-  seconds -= hours * 3600;
+    const hours = Math.floor(seconds / 3600);
+    seconds -= hours * 3600;
 
-  const minutes = Math.floor(seconds / 60);
-  seconds -= minutes * 60;
+    const minutes = Math.floor(seconds / 60);
+    seconds -= minutes * 60;
 
-  if (days > 0) {
-    return `${days} day${days > 1 ? 's' : ''}`;
-  }
+    if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''}`;
+    }
 
-  if (hours > 0) {
-    return `${hours} hour${hours > 1 ? 's' : ''}`;
-  }
+    if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''}`;
+    }
 
-  if (minutes > 0) {
-    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-  }
+    if (minutes > 0) {
+        return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
 
 
-  return `${seconds} second${seconds > 1 ? 's' : ''}`;
+    return `${seconds} second${seconds > 1 ? 's' : ''}`;
 }
 
 function runHttpsServer() {
