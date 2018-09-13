@@ -49,6 +49,7 @@ function headerSetup(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Content-Type', 'application/json');
 
     next();
 }
@@ -60,21 +61,22 @@ function appVersionHandler(req, res) {
 async function issueDemoTokenHandler(req, res) {
     const data = req.body;
     if (!web3.isAddress(data.recipientAddress)) {
-        let message = `Wrong recipient address: ${data.recipientAddress} `;
+        let message = `Incorrect wallet address`;
         logger.info(message);
         res.status(HttpStatusCode.UNPROCESSABLE_ENTITY).send(message);
         return;
     }
-    
+
     const isThrottled = await Issue.method.isAddressThrottled(data.recipientAddress, config.throttleTimeInSeconds);
-    if (isThrottled) {
-        let message = `The adress ${data.recipientAddress} has reached limit.`;
+    if (isThrottled.result) {
+        const remainingTime = secondsToFormattedTime(isThrottled.secondsUntilUnblock);
+        let message = `You have already requested for a free demo tokens. You can request for 100 demo tokens in next ${remainingTime}`;
         logger.info(message);
         res.status(HttpStatusCode.TOO_MANY_REQUESTS).send(message);
         return;
     }
 
-    const value = web3.toWei(config.giveawayTokenAmounts, "ether");
+    const value = web3.toWei(config.giveawayTokenAmounts, 'ether');
     logger.info(`[blockchain] Issue demo token. Recipient: ${data.recipientAddress} value ${value} `);
     try {
         await tokenInstance.issue(data.recipientAddress, value, { from: config.account });
@@ -86,12 +88,42 @@ async function issueDemoTokenHandler(req, res) {
             .catch(e => {
                 logger.error(`[mongodb][save] ${e.message}`);
             });
-        res.sendStatus(HttpStatusCode.OK);
+        res
+          .status(HttpStatusCode.OK)
+          .send(JSON.stringify({ result: 'OK' }));;
     }
     catch (e) {
         logger.error(data.recipientAddress + ' ' + e.message);
         res.sendStatus(HttpStatusCode.BAD_REQUEST);
     }
+}
+
+function secondsToFormattedTime(timeInSeconds) {
+  let seconds = timeInSeconds;
+
+  const days = Math.floor(seconds / (3600 * 24));
+  seconds -= days * 3600 * 24;
+
+  const hours = Math.floor(seconds / 3600);
+  seconds -= hours * 3600;
+
+  const minutes = Math.floor(seconds / 60);
+  seconds -= minutes * 60;
+
+  if (days > 0) {
+    return `${days} day${days > 1 ? 's' : ''}`;
+  }
+
+  if (hours > 0) {
+    return `${hours} hour${hours > 1 ? 's' : ''}`;
+  }
+
+  if (minutes > 0) {
+    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  }
+
+
+  return `${seconds} second${seconds > 1 ? 's' : ''}`;
 }
 
 function runHttpsServer() {

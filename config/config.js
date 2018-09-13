@@ -1,6 +1,6 @@
 const config = {
     server: {
-        protocol: process.env.FAUCET_SERVER_PROTOCOL || 'https',
+        protocol: process.env.FAUCET_SERVER_PROTOCOL || 'http',
         port: process.env.FAUCET_SERVER_PORT || 3000,
         host: process.env.FAUCET_SERVER_HOST || 'localhost'
     },
