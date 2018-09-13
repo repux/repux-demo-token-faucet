@@ -44,7 +44,7 @@ import { serverApiUrl } from './../../config/config';
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 messageDiv.removeClass().addClass('alert alert-danger');
-                messageDiv.html('There were some errors.' + jqXHR.responseText || '');
+                messageDiv.html(jqXHR.responseText || '');
             }
         });
     });

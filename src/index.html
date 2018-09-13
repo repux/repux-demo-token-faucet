@@ -5,26 +5,55 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
-        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+          crossorigin="anonymous">
 
     <title>RepuX DemoToken faucet.</title>
+    <style>
+        .container {
+            max-width: 600px;
+        }
+
+        .btn-primary,
+        .btn-primary:not(:disabled):not(.disabled):active {
+            color: #fff;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, #2DBD9D 0%, #0fda4d 100%);
+            border: none;
+        }
+
+        .alert {
+            border: none;
+            padding: 10px;
+        }
+
+        .alert-success {
+            color: green;
+            background: none;
+        }
+
+        .alert-danger {
+            background: none;
+            color: red;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="py-5 text-center">
-            <h1>RepuX DemoToken faucet</h1>
-        </div>
-        <form method="POST" id="issueForm" class="form-label-group" action="#">
-            <div class="form-label-group mb-3">
-                <input class="form-control" type="text" name="recipientAddress" placeholder="your address" />
-                <div id="message" class="alert-primary" role="alert"> </div>
-            </div>
-
-            <button class="btn btn-lg btn-primary btn-block mb-3" id="submit">Request for 100 DemoTokens</button>
-        </form>
+<div class="container">
+    <div class="py-5 text-center">
+        <h1>RepuX DemoToken faucet</h1>
     </div>
+    <form method="POST" id="issueForm" class="form-label-group" action="#">
+        <div class="form-label-group mb-3">
+            <input class="form-control" type="text" name="recipientAddress" placeholder="your address"/>
+            <div id="message" class="alert-primary" role="alert"></div>
+        </div>
+
+        <button class="btn btn-lg btn-primary btn-block mb-3" id="submit">Request for 100 DemoTokens</button>
+    </form>
+</div>
 </body>
 
 </html>

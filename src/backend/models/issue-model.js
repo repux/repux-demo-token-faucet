@@ -17,15 +17,22 @@ const methods = {
                 }
 
                 if (!issue) {
-                    return resolve(false);
+                    return resolve({
+                      result: false
+                    });
                 }
 
                 const dateDiffInSeconds = Math.round((Date.now() - issue.date) / 1000);
                 if (dateDiffInSeconds > blockedTimeInSeconds) {
-                    return resolve(false);
+                    return resolve({
+                      result: false
+                    });
                 }
 
-                return resolve(true);
+                return resolve({
+                  result: true,
+                  secondsUntilUnblock: blockedTimeInSeconds - dateDiffInSeconds
+                });
             })
         })
     }
