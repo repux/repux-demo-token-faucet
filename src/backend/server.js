@@ -9,6 +9,8 @@ const HttpStatusCode = require('http-status-codes');
 const logger = require('./logger');
 const Issue = require('./models/issue-model');
 const { DemoToken, web3 } = require('./demo-token');
+const sendEth = require('./utils/send-eth');
+const secondsToFormattedTime = require('./utils/seconds-to-formatted-time');
 
 logger.info('[init] DemoToken address set to: ' + config.demoTokenAddress);
 logger.info('[init] Connecting to: ' + config.ethereumHost);
@@ -55,7 +57,7 @@ function headerSetup(req, res, next) {
 }
 
 function appVersionHandler(req, res) {
-    res.send('version: 0.2');
+    res.send('version: 0.3');
 };
 
 async function issueDemoTokenHandler(req, res) {
@@ -71,7 +73,6 @@ async function issueDemoTokenHandler(req, res) {
     if (isThrottled.result) {
         const remainingTime = secondsToFormattedTime(isThrottled.secondsUntilUnblock);
         let message = `You have already requested for a free demo tokens. You can request for 100 demo tokens in next ${remainingTime}`;
-        logger.info(message);
         res.status(HttpStatusCode.TOO_MANY_REQUESTS).send(message);
         return;
     }
@@ -80,53 +81,31 @@ async function issueDemoTokenHandler(req, res) {
         address: data.recipientAddress,
         tokensAmount: config.giveawayTokenAmounts
     });
-    await issue.save().
-        then(async () => {
-            const value = web3.toWei(config.giveawayTokenAmounts, 'ether');
-            logger.info(`[blockchain] Issue demo token. Recipient: ${data.recipientAddress} value ${value} `);
-            try {
-                await tokenInstance.issue(data.recipientAddress, value, { from: config.account });
-                res
-                    .status(HttpStatusCode.OK)
-                    .send(JSON.stringify({ result: 'OK' }));
-            }
-            catch (e) {
-                issue.remove();
-                logger.error(data.recipientAddress + ' ' + e.message);
-                res.sendStatus(HttpStatusCode.BAD_REQUEST);
-            }
-        })
-        .catch(e => {
-            logger.error(`[mongodb][save] ${e.message}`);
-        });
-}
 
-function secondsToFormattedTime(timeInSeconds) {
-    let seconds = timeInSeconds;
-
-    const days = Math.floor(seconds / (3600 * 24));
-    seconds -= days * 3600 * 24;
-
-    const hours = Math.floor(seconds / 3600);
-    seconds -= hours * 3600;
-
-    const minutes = Math.floor(seconds / 60);
-    seconds -= minutes * 60;
-
-    if (days > 0) {
-        return `${days} day${days > 1 ? 's' : ''}`;
+    try {
+        await issue.save();
+    }
+    catch (e) {
+        logger.error(`[mongodb][save] ${e.message}`);
+        res.sendStatus(HttpStatusCode.BAD_REQUEST);
+        return;
     }
 
-    if (hours > 0) {
-        return `${hours} hour${hours > 1 ? 's' : ''}`;
+    const value = web3.toWei(config.giveawayTokenAmounts, 'ether');
+    try {
+        logger.info(`[blockchain] Issue demo token. Recipient: ${data.recipientAddress} value ${value} `);
+        await tokenInstance.issue(data.recipientAddress, value, { from: config.account });
+        await executeSendEthTransaction(data.recipientAddress);
+
+        res
+            .status(HttpStatusCode.OK)
+            .send(JSON.stringify({ result: 'OK' }));
     }
-
-    if (minutes > 0) {
-        return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    catch (e) {
+        issue.remove();
+        logger.error(`recipient: ${data.recipientAddress} have same errors.${e.message}`);
+        res.sendStatus(HttpStatusCode.BAD_REQUEST);
     }
-
-
-    return `${seconds} second${seconds > 1 ? 's' : ''}`;
 }
 
 function runHttpsServer() {
@@ -143,4 +122,15 @@ function runHttpServer() {
     http.createServer(app).listen(serverConfig, () => {
         logger.info(`[init] Listening on http://${config.server.host}:${config.server.port}`);
     });
+}
+
+async function executeSendEthTransaction(recipientAddress) {
+    try {
+        logger.info(`[blockchain][eth] Sending ${config.freeEthAmount} eth to ${recipientAddress}`);
+        const hash = await sendEth(config.freeEthSourceAddress, recipientAddress, web3.toWei(config.freeEthAmount, 'ether'), web3);
+        logger.info(`[blockchain][eth] Ether send to ${recipientAddress}. hash: ${hash}`);
+    }
+    catch (e) {
+        logger.error(`[blockchain][eth] Ether not send to ${recipientAddress}. Message: ${e.message}`);
+    }
 }
