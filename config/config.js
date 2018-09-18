@@ -10,6 +10,8 @@ const config = {
     },
 
     demoTokenAddress: process.env.FAUCET_DEMO_TOKEN_ADDRESS || '0xbd83c21e6f0a9547abe908c6faa02a55512d57b4',
+    freeEthSourceAddress: process.env.FAUCET_FREE_ETH_SOURCE_ADDRESS || '0x107a1dc2a74adb3c0fdddb20614b1bdabf35a8a8',
+    freeEthAmount: process.env.FAUCET_FREE_ETH_AMOUNT || 0.1,
     account: process.env.FAUCET_ACCOUNT || '0x107a1dc2a74adb3c0fdddb20614b1bdabf35a8a8',
     giveawayTokenAmounts: process.env.FAUCET_GIVEAWAY_TOKENS_AMOUNT || 100, // in ether
     throttleTimeInSeconds: process.env.FAUCET_THROTTLE_TIME_IN_SECONDS || 60,
